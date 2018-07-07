@@ -40,7 +40,8 @@ function init(){
     });
 
     socket.on('get_info', function(msg){
-      updateNodeInfo(msg, msg.nodeid);
+			console.log(msg)
+      // updateNodeInfo(msg, msg.nodeid);
     });
 
     socket.on('error_node', function(msg){
@@ -190,7 +191,7 @@ function checkNodes(){
 
 
 function updateNodeInfo(node, nodeID){
-    if (blockProducerList.length == 0) return;
+    if (blockProducerList.length == 0 || !blockProducerList[nodeID]) return;
 
    	//$( "#c1_"+blockProducerList[nodeID].bp_name ).removeClass( "bold" );
 	$("#resp_time_n0_"+blockProducerList[nodeID].bp_name ).removeClass( "black" );

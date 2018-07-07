@@ -12,7 +12,7 @@
 DIR="./"
 
 
-    if [ -f $DIR"/bem-server.pid" ]; then
+if [ -f $DIR"/bem-server.pid" ]; then
 	pid=`cat $DIR"/bem-server.pid"`
 	echo $pid
 	kill $pid

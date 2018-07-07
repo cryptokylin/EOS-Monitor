@@ -8,4 +8,4 @@
 #
 ###############################################################################  */
 
-var eosMonitorServer = "http://MONITOR_SERVER_IP:4000";
+var eosMonitorServer = "http://localhost:4000";

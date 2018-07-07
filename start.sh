@@ -11,6 +11,6 @@
 
 DATADIR="./"
 
-./stop
+./stop.sh
 node index.js  > $DATADIR/bem-server_out.log 2> $DATADIR/bem-server_err.log &  echo $! > $DATADIR/bem-server.pid
 

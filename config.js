@@ -10,7 +10,7 @@
 
 module.exports = {
 	eos_monitor_port: "4000",  //This Monitor Port to listen Websockets and http
-	nodeAddr: "127.0.0.1:8888", // Your Local node connected to network
+	nodeAddr: "api-direct.eosasia.one", // Your Local node connected to network
 
 	mongoURL: "mongodb://localhost:27017/",  //mongoDB url Path
 	mongoDB: "eosbemonitor",  //mongoDB database name
@@ -25,7 +25,7 @@ module.exports = {
 	},
 
 	TELEGRAM_API: {
-		enabled: true,
+		enabled: false,
 		telegram_ID: "12345678:AF3e3asf-FSOFHRFIHF",  //telegrem bot ID
 		tryToCheckBeforeSend: 3,  // How many error loops before send
 		intervalBetweenMsg: 900,  //900sec = 15minutes

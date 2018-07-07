@@ -189,15 +189,17 @@ function getNodeInfo(this_, ipaddr, nodeid){
 
 	this_.announceMsg(this_, "ping", {nodeid: nodeid});
 
-	this_.data.request({url: url, json: true, timeout: 40000}, function (error, response, body) {
+	
+	this_.data.request({url: url, json: true, timeout: 40000}, function (error, response, body) {		
 	    if (!error && response.statusCode === 200 ) {
+			
 	        //console.log(body); // Print the json response
 	        this_.LAST_GETINFG = body;
 	        body.nodeid = nodeid;
 	        body.ping = new Date().getTime() - this_.LastCheckedNodePing[nodeid];
 	        body.txs = this_.STATS.total_tx_count;
             body.txblocks = this_.STATS.total_txblocks_count;
-            //console.log('Ping: '+body.ping);
+			console.log('Ping: '+body.ping);
 	        this_.announceMsg(this_, "get_info", body);
 
             if (this_.data.CONFIG.TELEGRAM_API.enabled && this_.NODES[nodeid]){
@@ -234,6 +236,8 @@ function getBlockInfo(this_, ipaddr, blocknum){
 		}, function (error, response, body) {
 
 		    if (!error && response.statusCode === 200) {
+				console.log(url, blocknum)
+				console.log(body)
 	            this_.processBlock(this_, blocknum, body);
 		        //console.log(body); // Print the json response
 		        //this_.LAST_GETINFG = body;
@@ -265,12 +269,13 @@ function processBlock(this_, blocknum, block){
 
 	if (this_.PRODUCERS[block.producer]){
 		this_.PRODUCERS[block.producer].produced += 1;
-		this_.PRODUCERS[block.producer].tx_count += block.input_transactions.length;
+		this_.PRODUCERS[block.producer].tx_count += block.transactions.length;
 		this_.PRODUCERS[block.producer].tx_sum += 0;  //!!!! ADD SUMS
 	} else {
+		console.log(block)
 		this_.PRODUCERS[block.producer] = {};
 		this_.PRODUCERS[block.producer].produced = 1;
-		this_.PRODUCERS[block.producer].tx_count = block.input_transactions.length;
+		this_.PRODUCERS[block.producer].tx_count = block.transactions.length;
 		this_.PRODUCERS[block.producer].tx_sum = 0;  //!!!! ADD SUMS
 	}
 
@@ -278,20 +283,20 @@ function processBlock(this_, blocknum, block){
 	this_.announceMsg(this_, "blockprod_update", this_.PRODUCERS[block.producer]);
 
 
-    if (block.input_transactions.length > 0){
+    if (block.transactions.length > 0){
     	this_.STATS.total_txblocks_count ++;
 
-    	this_.STATS.total_tx_count += block.input_transactions.length;
+    	this_.STATS.total_tx_count += block.transactions.length;
 
         this_.processTransaction(this_, block.block_num, block);
 
         //console.log(this_.PRODUCERS);
     	//console.log('-----------------------------');
-    	//console.log(block.input_transactions);
+    	//console.log(block.transactions);
     	//console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=');
-    	//console.log(block.input_transactions[0].data.actions);
+    	//console.log(block.transactions[0].data.actions);
     	//console.log('==============================');
-    	//console.log(JSON.stringify(block.input_transactions));
+    	//console.log(JSON.stringify(block.transactions));
     	//console.log('');
     	///console.log('');
 
@@ -304,16 +309,16 @@ function processBlock(this_, blocknum, block){
 
 function processTransaction(this_, blocknum, block){
     //console.log(txs);
-	var txs = block.input_transactions;
+	var txs = block.transactions;
 	//var txs_id =block.regions[0];
 
 	for (var t in txs) {
 		var txs_id = "";
 
-		if (block.regions[0] && block.regions[0].cycles_summary[1] && block.regions[0].cycles_summary[1][0].transactions)
+		if (block.region && block.regions[0] && block.regions[0].cycles_summary[1] && block.regions[0].cycles_summary[1][0].transactions)
     		txs_id = block.regions[0].cycles_summary[1][0].transactions[t].id;
 
-		var tx = txs[t].transaction;
+		var tx = txs[t].trx;
        	var actions = tx.actions;
 
        	for (var a in actions){
