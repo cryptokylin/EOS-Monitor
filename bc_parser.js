@@ -87,7 +87,7 @@ function init(data){
 	this.getTransactions(this, 0, 6, function(this_, res){
     	th.LastTransactions = res.reverse();
     	th.LastTXLoaded = true;
-        console.log(res);
+        // console.log(res);
 	});
 	//clearInterval(interval);
 }
@@ -191,15 +191,16 @@ function getNodeInfo(this_, ipaddr, nodeid){
 
 	
 	this_.data.request({url: url, json: true, timeout: 40000}, function (error, response, body) {		
+            //console.log("aaa NODEID:", nodeid, error, response.statusCode, url);
 	    if (!error && response.statusCode === 200 ) {
 			
-	        //console.log(body); // Print the json response
+	        //console.log("bbb NODEID:", nodeid, body); // Print the json response
 	        this_.LAST_GETINFG = body;
 	        body.nodeid = nodeid;
 	        body.ping = new Date().getTime() - this_.LastCheckedNodePing[nodeid];
 	        body.txs = this_.STATS.total_tx_count;
             body.txblocks = this_.STATS.total_txblocks_count;
-			console.log('Ping: '+body.ping);
+			//console.log('Ping: '+body.ping);
 	        this_.announceMsg(this_, "get_info", body);
 
             if (this_.data.CONFIG.TELEGRAM_API.enabled && this_.NODES[nodeid]){
@@ -207,6 +208,7 @@ function getNodeInfo(this_, ipaddr, nodeid){
             	this_.nodeUpNotification(this_, this_.NODES[nodeid].bp_name);
             }
 	    } else {
+                   console.log("node error!!!!", nodeid);
 	 		this_.announceMsg(this_, "error_node", nodeid);
 	 		//this_.NODES[nodeid].bp_name
             if (this_.data.CONFIG.TELEGRAM_API.enabled) {
@@ -236,8 +238,8 @@ function getBlockInfo(this_, ipaddr, blocknum){
 		}, function (error, response, body) {
 
 		    if (!error && response.statusCode === 200) {
-				console.log(url, blocknum)
-				console.log(body)
+				// console.log(url, blocknum)
+				// console.log(body)
 	            this_.processBlock(this_, blocknum, body);
 		        //console.log(body); // Print the json response
 		        //this_.LAST_GETINFG = body;

@@ -8,4 +8,4 @@
 #
 ###############################################################################  */
 
-var eosMonitorServer = "http://localhost:4000";
+var eosMonitorServer = "http://monitor.cryptokylin.io";

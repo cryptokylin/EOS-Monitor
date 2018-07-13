@@ -40,8 +40,8 @@ function init(){
     });
 
     socket.on('get_info', function(msg){
-			console.log(msg)
-      // updateNodeInfo(msg, msg.nodeid);
+			// console.log(msg)
+      updateNodeInfo(msg, msg.nodeid);
     });
 
     socket.on('error_node', function(msg){
@@ -121,7 +121,7 @@ function init(){
   		var peer_list = "";
         for (var bpp in blockProducerList){
         	if (blockProducerList[bpp].bp && blockProducerList[bpp].enabled)
-        		peer_list += "p2p-peer-address = "+blockProducerList[bpp].node_addr+":"+blockProducerList[bpp].port_p2p+"<BR>";
+        		peer_list += "p2p-peer-address = "+blockProducerList[bpp].addr_p2p+":"+blockProducerList[bpp].port_p2p+"<BR>";
         }
 
 		$('#modal_body').html('<span id="peer_list" onclick="fnSelect(\'peer_list\')">'+peer_list+'</span>');
@@ -191,6 +191,7 @@ function checkNodes(){
 
 
 function updateNodeInfo(node, nodeID){
+    //console.log('updateNodeInfo called!')
     if (blockProducerList.length == 0 || !blockProducerList[nodeID]) return;
 
    	//$( "#c1_"+blockProducerList[nodeID].bp_name ).removeClass( "bold" );
@@ -215,6 +216,7 @@ function updateNodeInfo(node, nodeID){
 		delete errorNodes[blockProducerList[nodeID].bp_name];
 	}
 
+   	//console.log('aaa:', LastBlockNum, LastBlockNum, node.head_block_num);
    	if (LastBlockNum ==-1 || LastBlockNum < node.head_block_num){  //skip not synced nodes
 	   	LastBlockNum = node.head_block_num;
 		$('#lastBlock').html(formatBogNumbers(node.head_block_num));
@@ -376,7 +378,7 @@ function initNodesList(){
  								<td class='c0' id='c0_"+bpN+"'>"+"<span data-toggle='tooltip' data-placement='top' title='"+toolTip_inf+"'>"+(nodesBPCount)+"</span>"+response_time+" </td> \
  								<td class='c1' id='c1_"+bpN+"'>"+blockProducerList[bp_].bp_name +"</td> \
  								<td class='c2' id='c2_"+bpN+"'>"+lastCheck+"</td> \
- 								<td class='c3' id='c3_"+bpN+"'>"+lastNodeBlock+"</td> \
+                                                                <td class='c3' id='c3_"+bpN+"'>"+lastNodeBlock+"</td> \
 								<td class='c5' id='c5_"+bpN+"'>"+lastNodeBlockProducedTime+"</td> \
 								<td class='c4' id='c4_"+bpN+"'>"+lastNodeBlockProduced+"</td> \
 								<td class='c7' id='c7_"+bpN+"'>"+blockProducerList[bp_].node_addr+"</td> \
