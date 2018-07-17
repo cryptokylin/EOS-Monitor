@@ -79,17 +79,15 @@ function init(data){
     this.interval_main_loop = setInterval(mainLoop, this.data.CONFIG.mainLoopInterval, this);
     this.interval_blockcheck = setInterval(CheckNewBlocksTimer, this.data.CONFIG.blockCheckInterval, this);
 
-    if (this.data.CONFIG.TELEGRAM_API.enabled)
+    if (this.data.CONFIG.TELEGRAM_API.enabled) {
         this.interval_telegramm = setInterval(CheckNewTelegramUsers, this.data.CONFIG.TelegramCheckInterval, this);
+    }
 
-    //var msgObject = {"c1": blocknum, "c2": action.name};
     var th = this;
     this.getTransactions(this, 0, 6, function(this_, res){
         th.LastTransactions = res.reverse();
         th.LastTXLoaded = true;
-        // console.log(res);
     });
-    //clearInterval(interval);
 }
 
 
@@ -143,8 +141,6 @@ function announceMsg(this_, action, msg){
 function connected(socket){
 
     socket.emit("initNodes", this.NODES);
-
-    //console.log(this.NODES);
 
     this.connections_data[socket.id] = socket;
     this.connections++;
