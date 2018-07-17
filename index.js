@@ -21,9 +21,7 @@ var bc_parser = require("./bc_parser");
 
 var MongoClient = require("mongodb").MongoClient;
 
-
 app.use("/", express.static(__dirname + "/html"));
-
 
 MongoClient.connect( CONFIG.mongoURL, function(err, db) {
 
@@ -72,7 +70,6 @@ MongoClient.connect( CONFIG.mongoURL, function(err, db) {
 
     });
 });
-
 
 http.listen(CONFIG.eos_monitor_port, function(){
     console.log("listening on *:"+CONFIG.eos_monitor_port);
