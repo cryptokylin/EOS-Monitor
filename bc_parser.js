@@ -168,7 +168,6 @@ function getNodeInfo(this_, ipaddr, nodeid){
     if(node) {
         data["bp_name"] = node.bp_name;
     }
-    this_.announceMsg(this_, "ping", data);
   
     this_.data.request({url: url, json: true, timeout: 40000}, function (error, response, body) {    
         //console.log("aaa NODEID:", nodeid, error, response.statusCode, url);
@@ -184,7 +183,11 @@ function getNodeInfo(this_, ipaddr, nodeid){
             if(node) {
                 body.bp_name = node.bp_name;
                 this_.updateNode(this_, node.bp_name, {"info": body});
+                //console.log(1111111, node.bp_name, body);
             }
+            data.ping = body.ping;
+            //this_.announceMsg(this_, "ping", data);
+            this_.announceMsg(this_, "ping", body);
             this_.announceMsg(this_, "get_info", body);
 
             if (this_.data.CONFIG.TELEGRAM_API.enabled && this_.NODES[nodeid]){
