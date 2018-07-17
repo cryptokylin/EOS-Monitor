@@ -9,3 +9,4 @@
 ###############################################################################  */
 
 var eosMonitorServer = "http://monitor.cryptokylin.io";
+//var eosMonitorServer = "http://35.241.61.102";

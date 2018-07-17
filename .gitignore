@@ -2,3 +2,5 @@ node_modules
 bem-server_err.log
 bem-server_out.log
 bem-server.pid
+config.js
+docker-compose.yaml

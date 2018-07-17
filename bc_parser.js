@@ -187,7 +187,13 @@ function getNodeInfo(this_, ipaddr, nodeid){
 	//var url = "http://127.0.0.1:8898/v1/chain/get_info";
     this_.LastCheckedNodePing[nodeid] = new Date().getTime();
 
-	this_.announceMsg(this_, "ping", {nodeid: nodeid});
+        var node = this_.NODES[nodeid];
+        var data = {nodeid: nodeid};
+        if(node) {
+            data['bp_name'] = node.bp_name;
+        }
+        console.log(1111, node, data);
+	this_.announceMsg(this_, "ping", data);
 
 	
 	this_.data.request({url: url, json: true, timeout: 40000}, function (error, response, body) {		
@@ -199,8 +205,11 @@ function getNodeInfo(this_, ipaddr, nodeid){
 	        body.nodeid = nodeid;
 	        body.ping = new Date().getTime() - this_.LastCheckedNodePing[nodeid];
 	        body.txs = this_.STATS.total_tx_count;
-            body.txblocks = this_.STATS.total_txblocks_count;
-			//console.log('Ping: '+body.ping);
+                body.txblocks = this_.STATS.total_txblocks_count;
+		//console.log('Ping: '+body.ping);
+                if(node) {
+                    body.bp_name = node.bp_name;
+                }
 	        this_.announceMsg(this_, "get_info", body);
 
             if (this_.data.CONFIG.TELEGRAM_API.enabled && this_.NODES[nodeid]){
@@ -649,9 +658,6 @@ function getNodes(){
     	th.nodesLoaded = true;
 
         th.announceMsg(th, "initNodes", th.NODES);
-
- 		//th.socket.emit("initNodes", th.NODES);
-    	//console.log(th.NODES);
 
   	});
 }
