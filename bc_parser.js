@@ -23,6 +23,7 @@ module.exports = {
     updateSTATS: updateSTATS,
     updateProducer: updateProducer,
     updateAccount: updateAccount,
+    updateNode: updateNode,
     addTransactions: addTransactions,
     APIrequest: APIrequest,
     CheckNewTelegramUsers: CheckNewTelegramUsers,
@@ -35,8 +36,6 @@ module.exports = {
     nodeUpNotification: nodeUpNotification,
     getTransactions: getTransactions,
     announceMsg: announceMsg,
-
-
     test: 0
 };
 
@@ -51,7 +50,6 @@ function reinit(){
     this.statsLoaded = false;
     this.producersLoaded = false;
     this.nodesLoaded = false;
-
 
     this.getNodes();
     this.getStats();
@@ -79,20 +77,16 @@ function init(data){
     this.interval_main_loop = setInterval(mainLoop, this.data.CONFIG.mainLoopInterval, this);
     this.interval_blockcheck = setInterval(CheckNewBlocksTimer, this.data.CONFIG.blockCheckInterval, this);
 
-    if (this.data.CONFIG.TELEGRAM_API.enabled)
+    if (this.data.CONFIG.TELEGRAM_API.enabled) {
         this.interval_telegramm = setInterval(CheckNewTelegramUsers, this.data.CONFIG.TelegramCheckInterval, this);
+    }
 
-    //var msgObject = {"c1": blocknum, "c2": action.name};
     var th = this;
     this.getTransactions(this, 0, 6, function(this_, res){
         th.LastTransactions = res.reverse();
         th.LastTXLoaded = true;
-        // console.log(res);
     });
-    //clearInterval(interval);
 }
-
-
 
 function mainLoop(this_){
 
@@ -112,7 +106,6 @@ function mainLoop(this_){
 
     this_.getNodeInfo(this_, addr+":"+port, this_.LastCheckedNode);
 
-
 }
 
 function CheckNewBlocksTimer(this_){
@@ -122,7 +115,6 @@ function CheckNewBlocksTimer(this_){
 
     var lastblockinfo = this_.LAST_GETINFG.head_block_num;
     //var lastblockinfo = 9500;
-
 
     if (this_.blockProcessing > 0 ) return;
 
@@ -144,12 +136,8 @@ function connected(socket){
 
     socket.emit("initNodes", this.NODES);
 
-    //console.log(this.NODES);
-
     this.connections_data[socket.id] = socket;
     this.connections++;
-
-
 
     //socket.emit("blockupdate", this.STATS.lastBlock);
     socket.emit("get_info", this.LAST_GETINFG);
@@ -161,18 +149,14 @@ function connected(socket){
         socket.emit("transaction", ltx[t].msgObject);
     }
 
-
-
     //console.log('bc_conn '+this.connections);
 }
-
 
 function disconnected(socket){
     this.connections--;
     delete this.connections_data[socket.id];
     this.announceMsg(this, "usersonline", this.connections);
 }
-
 
 function getNodeInfo(this_, ipaddr, nodeid){
     var url = "http://"+ipaddr + this_.data.EOSAPI.api_get_info;
@@ -185,7 +169,6 @@ function getNodeInfo(this_, ipaddr, nodeid){
         data["bp_name"] = node.bp_name;
     }
     this_.announceMsg(this_, "ping", data);
-
   
     this_.data.request({url: url, json: true, timeout: 40000}, function (error, response, body) {    
         //console.log("aaa NODEID:", nodeid, error, response.statusCode, url);
@@ -200,6 +183,7 @@ function getNodeInfo(this_, ipaddr, nodeid){
             //console.log('Ping: '+body.ping);
             if(node) {
                 body.bp_name = node.bp_name;
+                this_.updateNode(this_, node.bp_name, {"info": body});
             }
             this_.announceMsg(this_, "get_info", body);
 
@@ -255,7 +239,6 @@ function getBlockInfo(this_, ipaddr, blocknum){
 
 }
 
-
 function processBlock(this_, blocknum, block){
 
     this_.announceMsg(this_, "blockupdate", block);
@@ -282,7 +265,6 @@ function processBlock(this_, blocknum, block){
     this_.updateProducer(this_, block.producer, {name: block.producer, produced: this_.PRODUCERS[block.producer].produced, tx_count: this_.PRODUCERS[block.producer].tx_count, tx_sum: this_.PRODUCERS[block.producer].tx_sum});
     this_.announceMsg(this_, "blockprod_update", this_.PRODUCERS[block.producer]);
 
-
     if (block.transactions.length > 0){
         this_.STATS.total_txblocks_count ++;
 
@@ -299,7 +281,6 @@ function processBlock(this_, blocknum, block){
         //console.log(JSON.stringify(block.transactions));
         //console.log('');
         ///console.log('');
-
 
     }
 
@@ -336,9 +317,6 @@ function processTransaction(this_, blocknum, block){
             var txTo = "";
             var tx_data = {};
 
-
-
-
             switch (action.name){
             case "setcode":
                 msgObject.c3 = action.account;
@@ -348,7 +326,6 @@ function processTransaction(this_, blocknum, block){
                 //updAccount = { $push: {"transactions": {"action": action.name, "block":blocknum}}};
                 txTo = a_data.account;
                 tx_data = {};
-
 
                 txInfo_description = "smart contract";
                 break;
@@ -481,7 +458,6 @@ function processTransaction(this_, blocknum, block){
                     if (a_data.memo)
                         msgObject.c6 = a_data.memo;
 
-
                     var currency = (a_data.quantity+"").split(" ");
                     currency[0].replace(".", "");
                     currency[0].replace(",", "");
@@ -529,7 +505,6 @@ function processTransaction(this_, blocknum, block){
                 }
             }
 
-
             //var txInfo = {txid: txs_id, "block": blocknum, "account": action.account, "to": txTo, "action": action.name, "date": tx.expiration, "data": tx_data, "description": txInfo_description, "msgObject":msgObject};
             var txInfo = {txid: txs_id, "block": blocknum, "account": action.account, "to": txTo, "action": action.name, "date": tx.expiration, "data": {}, "description": txInfo_description, "msgObject":msgObject};
             this_.addTransactions(this_, txInfo);
@@ -540,9 +515,7 @@ function processTransaction(this_, blocknum, block){
                 this_.LastTransactions.shift();
             }
 
-
             this_.announceMsg(this_, "transaction", msgObject);
-
 
             //var newvalues = { $set: updValue, $inc: updAcc  };     //{"balances.EOS"}
 
@@ -552,22 +525,12 @@ function processTransaction(this_, blocknum, block){
             //issue: to, quantity
             //transfer: from, to, quantity, memo
 
-
         }
         //tx.ref_block_num
 
-
-
-
     }
 
-
-
-
-
 }
-
-
 
 function updateSTATS(this_){
     var newvalues = { $set: this_.STATS };
@@ -592,12 +555,14 @@ function updateAccount(this_, name, data){
     this_.data.dbo.collection("accounts").update({ name: name }, data, {upsert: true});
 }
 
+function updateNode(this_, name, data){
+    var newvalues = { $set: data };
+    this_.data.dbo.collection("nodes").update({ bp_name: name }, newvalues, {upsert: false});
+}
+
 function addTransactions(this_, data){
     this_.data.dbo.collection("transactions").insert(data);
 }
-
-
-
 
 function getStats(){
     var th = this;
@@ -611,7 +576,6 @@ function getStats(){
 
     });
 }
-
 
 function getProducers(){
     var th = this;
@@ -691,7 +655,6 @@ function CheckNewTelegramUsers(this_){
     });
 }
 
-
 function processTelegramUpdate(data, this_){
     var data_upd;
 
@@ -708,8 +671,6 @@ function processTelegramUpdate(data, this_){
 
             //data[i].message.chat.id
 
-
-
             var text_cmd = data[i].message.text;
             var cmd_arr = text_cmd.split(" ");
 
@@ -725,7 +686,6 @@ function processTelegramUpdate(data, this_){
                         names += cmd_arr[j] + ", ";
                     }
                     enabled = true;
-
 
                     data_upd = { $set: {
                         chatid: data[i].message.chat.id,
@@ -828,11 +788,9 @@ function telegramRequest(data, this_, calbback){
     );
 }
 
-
 function updateTelegramUsres(this_, chatid, data){
     this_.data.dbo.collection("telegram").update({ chatid: chatid }, data, {upsert: true});
 }
-
 
 function countObj(obj) {
     return Object.keys(obj).length;
