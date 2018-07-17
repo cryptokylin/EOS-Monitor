@@ -23,6 +23,7 @@ module.exports = {
     updateSTATS: updateSTATS,
     updateProducer: updateProducer,
     updateAccount: updateAccount,
+    updateNode: updateNode,
     addTransactions: addTransactions,
     APIrequest: APIrequest,
     CheckNewTelegramUsers: CheckNewTelegramUsers,
@@ -182,6 +183,7 @@ function getNodeInfo(this_, ipaddr, nodeid){
             //console.log('Ping: '+body.ping);
             if(node) {
                 body.bp_name = node.bp_name;
+                this_.updateNode(this_, node.bp_name, {"info": body});
             }
             this_.announceMsg(this_, "get_info", body);
 
@@ -551,6 +553,11 @@ function updateProducer(this_, name, data){
 
 function updateAccount(this_, name, data){
     this_.data.dbo.collection("accounts").update({ name: name }, data, {upsert: true});
+}
+
+function updateNode(this_, name, data){
+    var newvalues = { $set: data };
+    this_.data.dbo.collection("nodes").update({ bp_name: name }, newvalues, {upsert: false});
 }
 
 function addTransactions(this_, data){
